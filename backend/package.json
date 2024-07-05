@@ -4,13 +4,13 @@
   "author": "EngNet",
   "description": "Repositório template para os Backends dos nossos projetos.",
   "scripts": {
-    "dev": "nodemon --exec ts-node src/base/index.ts --watch src",
+    "dev": "nodemon --exec ts-node src/index.ts --watch src",
     "dev:no-watch": "ts-node src/base/index.ts",
     "build": "rimraf dist && tsc",
-    "start": "node dist/base/index.js"
+    "start": "node src/index.js"
   },
   "dependencies": {
-    "@prisma/client": "^5.14.0",
+    "@prisma/client": "^5.16.1",
     "cors": "^2.8.5",
     "date-fns": "^2.30.0",
     "dotenv-safe": "^8.2.0",
@@ -20,6 +20,7 @@
     "http-errors": "^2.0.0",
     "morgan": "^1.10.0",
     "mysql2": "^3.6.1",
+    "prisma": "^5.16.1",
     "zod": "^3.22.2",
     "zod-validation-error": "^1.5.0"
   },
@@ -42,7 +43,7 @@
     "nodemon": "^3.0.1",
     "prettier": "^3.0.3",
     "rimraf": "^5.0.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "typescript": "^5.2.2"
   }
 }

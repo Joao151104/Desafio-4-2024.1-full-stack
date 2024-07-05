@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,8 +7,15 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id    Int    @id @default(autoincrement()) @db.UnsignedInt
+  name  String @db.VarChar(50)
+  todos Todo[]
+}
 
 model Todo {
-  id    Int    @id @default(autoincrement()) @db.UnsignedInt
-  title String @db.VarChar(50)
+  id     Int    @id @default(autoincrement()) @db.UnsignedInt
+  title  String @db.VarChar(50)
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
 }

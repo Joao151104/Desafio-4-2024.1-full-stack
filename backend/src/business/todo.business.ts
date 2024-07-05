@@ -61,10 +61,14 @@ export async function updateTodo(id: number, { title }: TodoCreateDTO, userId: n
   const todo = await prisma.todo.update({
     where: {
       id,
-      userId,
     },
     data: {
       title,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
     },
     select: {
       id: true,
@@ -76,7 +80,7 @@ export async function updateTodo(id: number, { title }: TodoCreateDTO, userId: n
 }
 
 export async function deleteTodo(id: number, userId: number): Promise<void> {
-  await prisma.todo.delete({
+  await prisma.todo.deleteMany({
     where: {
       id,
       userId,
