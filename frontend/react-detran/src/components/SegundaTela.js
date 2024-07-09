@@ -1,6 +1,6 @@
 // src/components/SegundaTela.js
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 
 const SegundaTelaWrapper = styled.div`
@@ -92,6 +92,8 @@ const vehicles = [
 
 function SegundaTela() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { nomeProprietario } = location.state;
 
   const handleBackClick = () => {
     navigate('/');
@@ -112,7 +114,7 @@ function SegundaTela() {
   return (
     <SegundaTelaWrapper>
       <Header>
-        <Title>Veículos do [Proprietario]</Title>
+        <Title>Veículos do {nomeProprietario}</Title>
         <BackButton onClick={handleBackClick}>Voltar</BackButton>
         <Button onClick={handleCreateClick}>Criar</Button>
         <Table>

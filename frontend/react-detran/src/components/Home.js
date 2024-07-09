@@ -78,8 +78,8 @@ function Home() {
     navigate('/criar-proprietario');
   };
 
-  const handleCarClick = () => {
-    navigate('/segunda-tela');
+  const handleCarClick = (nome) => {
+    navigate('/segunda-tela', { state: { nomeProprietario: nome } });
   };
 
   const handleEditClick = (index) => {
@@ -93,7 +93,6 @@ function Home() {
   return (
     <HomeWrapper>
       <Header>
-        <Title>Bem vindo ao detran</Title>
         <SubTitle>Proprietários</SubTitle>
         <Button onClick={handleCreateClick}>Criar</Button>
         <Table>
@@ -116,7 +115,7 @@ function Home() {
                 <Td>{proprietario.categoria}</Td>
                 <Td>{proprietario.vencimento}</Td>
                 <Td>
-                  <IconButton onClick={handleCarClick}>{proprietario.veiculos}</IconButton>
+                  <IconButton onClick={() => handleCarClick(proprietario.nome)}>{proprietario.veiculos}</IconButton>
                 </Td>
                 <Td>
                   <IconButton onClick={() => handleMultaClick(index)}>
