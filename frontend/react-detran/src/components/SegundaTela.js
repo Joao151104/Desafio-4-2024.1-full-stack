@@ -64,6 +64,13 @@ const BackButton = styled(Button)`
   }
 `;
 
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+`;
+
 const vehicles = [
   {
     placa: '33444',
@@ -91,7 +98,15 @@ function SegundaTela() {
   };
 
   const handleCreateClick = () => {
-    // Lógica para criar um novo veículo
+    navigate('/criar-veiculo');
+  };
+
+  const handleEditClick = (index) => {
+    navigate(`/editar-veiculo/${index}`);
+  };
+
+  const handleMultaClick = (placa) => {
+    navigate(`/multas/${placa}`);
   };
 
   return (
@@ -120,9 +135,11 @@ function SegundaTela() {
                 <Td>{vehicle.modelo}</Td>
                 <Td>{vehicle.ano}</Td>
                 <Td>{vehicle.cor}</Td>
-                <Td>{vehicle.multas}</Td>
                 <Td>
-                  <Button>✏️</Button>
+                  <IconButton onClick={() => handleMultaClick(vehicle.placa)}>{vehicle.multas}</IconButton>
+                </Td>
+                <Td>
+                  <IconButton onClick={() => handleEditClick(index)}>✏️</IconButton>
                 </Td>
               </tr>
             ))}

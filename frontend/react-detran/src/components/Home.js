@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { useProprietarios } from '../contexts/ProprietariosContext';
 
 const HomeWrapper = styled.div`
   text-align: center;
@@ -52,7 +53,7 @@ const Table = styled.table`
 
 const Th = styled.th`
   padding: 12px;
-  background-color: #007bff;
+  background-color: #6c63ff;
   color: white;
   border: 1px solid #ddd;
 `;
@@ -62,53 +63,31 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
-const EditButton = styled.button`
+const IconButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
   font-size: 1.5em;
 `;
 
-const proprietarios = [
-  {
-    nome: 'aristeu motorista',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-    veiculos: '🚗',
-    multas: '📖',
-  },
-  {
-    nome: 'aristeu motociclista',
-    cpf: '99999999999999',
-    categoria: 'A',
-    vencimento: '30/12/2028',
-    veiculos: '🏍️',
-    multas: '📖',
-  },
-  {
-    nome: 'dona aristeia',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-    veiculos: '🚗',
-    multas: '📖',
-  },
-  {
-    nome: 'sr aristeu',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-    veiculos: '🚗',
-    multas: '📖',
-  },
-];
-
 function Home() {
   const navigate = useNavigate();
+  const { proprietarios } = useProprietarios();
 
   const handleCreateClick = () => {
+    navigate('/criar-proprietario');
+  };
+
+  const handleCarClick = () => {
     navigate('/segunda-tela');
+  };
+
+  const handleEditClick = (index) => {
+    navigate(`/editar-motorista/${index}`);
+  };
+
+  const handleMultaClick = (index) => {
+    navigate(`/multas/${index}`);
   };
 
   return (
@@ -136,10 +115,16 @@ function Home() {
                 <Td>{proprietario.cpf}</Td>
                 <Td>{proprietario.categoria}</Td>
                 <Td>{proprietario.vencimento}</Td>
-                <Td>{proprietario.veiculos}</Td>
-                <Td>{proprietario.multas}</Td>
                 <Td>
-                  <EditButton>✏️</EditButton>
+                  <IconButton onClick={handleCarClick}>{proprietario.veiculos}</IconButton>
+                </Td>
+                <Td>
+                  <IconButton onClick={() => handleMultaClick(index)}>
+                    {proprietario.multas.length > 0 ? '📖' : '📄'}
+                  </IconButton>
+                </Td>
+                <Td>
+                  <IconButton onClick={() => handleEditClick(index)}>✏️</IconButton>
                 </Td>
               </tr>
             ))}
