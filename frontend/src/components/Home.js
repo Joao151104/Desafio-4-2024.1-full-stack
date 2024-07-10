@@ -14,9 +14,7 @@ const Header = styled.header`
   border-radius: 8px;
 `;
 
-const Title = styled.h1`
-  font-size: 2em;
-`;
+
 
 const SubTitle = styled.h2`
   font-size: 1.5em;
@@ -78,8 +76,8 @@ function Home() {
     navigate('/criar-proprietario');
   };
 
-  const handleCarClick = (nome) => {
-    navigate('/segunda-tela', { state: { nomeProprietario: nome } });
+  const handleCarClick = (index) => {
+    navigate(`/segunda-tela/${index}`);
   };
 
   const handleEditClick = (index) => {

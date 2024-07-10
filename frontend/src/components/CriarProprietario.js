@@ -1,5 +1,4 @@
-// src/components/CriarProprietario.js
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -71,15 +70,44 @@ const SubmitButton = styled.button`
 
 function CriarProprietario() {
   const navigate = useNavigate();
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [vencimento, setVencimento] = useState('');
 
   const handleCloseClick = () => {
     navigate('/');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Lógica para enviar o formulário
-    navigate('/');
+
+    const motorista = {
+      nome,
+      cpf,
+      categoriaCnh: categoria,
+      vencimentoCnh: vencimento,
+    };
+
+    try {
+      // SUBSTITUIR PELO LINK DO BACK-END
+      const response = await fetch('http://localhost:8000/api/motoristas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(motorista),
+      });
+
+      if (response.ok) {
+        console.log('Motorista criado com sucesso');
+        navigate('/');
+      } else {
+        console.error('Erro ao criar motorista');
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
   };
 
   return (
@@ -91,19 +119,19 @@ function CriarProprietario() {
       <Form onSubmit={handleSubmit}>
         <Label>
           Nome:
-          <Input type="text" name="nome" required />
+          <Input type="text" name="nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
         </Label>
         <Label>
           CPF:
-          <Input type="text" name="cpf" required />
+          <Input type="text" name="cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} required />
         </Label>
         <Label>
           Categoria CNH:
-          <Input type="text" name="categoria" required />
+          <Input type="text" name="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} required />
         </Label>
         <Label>
           Vencimento CNH:
-          <Input type="date" name="vencimento" required />
+          <Input type="date" name="vencimento" value={vencimento} onChange={(e) => setVencimento(e.target.value)} required />
         </Label>
         <SubmitButton type="submit">Criar</SubmitButton>
       </Form>
