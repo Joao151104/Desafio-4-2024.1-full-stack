@@ -19,3 +19,32 @@ model Todo {
   userId Int
   user   User   @relation(fields: [userId], references: [id])
 }
+
+model Motorista {
+  CPF              String   @id @db.Char(11)
+  nome             String   @db.VarChar(100)
+  vencimento_CNH   DateTime @db.Date
+  categoria_CNH    String   @db.Char(2)
+  veiculos         Veiculo[]
+}
+
+model Veiculo {
+  placa           String   @id @db.Char(7)
+  marca           String   @db.VarChar(50)
+  modelo          String   @db.VarChar(50)
+  ano             Int      @db.Year
+  cor             String   @db.VarChar(20)
+  motorista_CPF   String?  @db.Char(11)
+  motorista       Motorista? @relation(fields: [motorista_CPF], references: [CPF])
+  multas          Multa[]
+}
+
+model Multa {
+  multaID         Int      @id @default(autoincrement())
+  valor           Float    @db.Decimal(10, 2)
+  data            DateTime @db.Date
+  pontos_penalidade Int
+  tipo_infracao   String   @db.VarChar(255)
+  veiculo_placa   String?  @db.Char(7)
+  veiculo         Veiculo? @relation(fields: [veiculo_placa], references: [placa])
+}

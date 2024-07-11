@@ -33,6 +33,7 @@
     "@types/jsonwebtoken": "^9.0.2",
     "@types/morgan": "^1.9.9",
     "@types/ms": "^0.7.31",
+    "@types/node": "^20.14.10",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "eslint": "^8.49.0",
     "eslint-config-prettier": "^9.0.0",
@@ -44,6 +45,6 @@
     "prettier": "^3.0.3",
     "rimraf": "^5.0.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.5.3"
   }
 }

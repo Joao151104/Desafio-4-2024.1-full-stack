@@ -1,0 +1,13 @@
+{
+    "name": "Desafio-4-2024.1-full-stack",
+    "version": "1.0.0",
+    "scripts": {
+      "start-backend": "cd backend && npm start",
+      "start-frontend": "cd frontend && npm start",
+      "start": "npm-run-all --parallel start-backend start-frontend"
+    },
+    "devDependencies": {
+      "npm-run-all": "^4.1.5"
+    }
+  }
+  
