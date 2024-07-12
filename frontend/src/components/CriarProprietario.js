@@ -1,3 +1,5 @@
+// src/components/CriarProprietario.js
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -74,40 +76,54 @@ function CriarProprietario() {
   const [cpf, setCpf] = useState('');
   const [categoria, setCategoria] = useState('');
   const [vencimento, setVencimento] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCloseClick = () => {
     navigate('/');
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const formattedVencimento = formatDate(vencimento);
     const motorista = {
       nome,
       cpf,
-      categoriaCnh: categoria,
-      vencimentoCnh: vencimento,
+      categoria,
+      vencimento: formattedVencimento,
     };
 
     try {
-      // SUBSTITUIR PELO LINK DO BACK-END
-      const response = await fetch('http://localhost:8000/api/motoristas', {
+      const response = await fetch('http://localhost:8000/proprietario', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(motorista),
       });
-
+    
       if (response.ok) {
-        console.log('Motorista criado com sucesso');
+        console.log('Proprietário criado com sucesso');
         navigate('/');
       } else {
-        console.error('Erro ao criar motorista');
+        const errorData = await response.json();
+        setErrorMessage('verifique os dados: ' + errorData.message);
+        console.error('Erro ao criar proprietário:', errorData);
       }
     } catch (error) {
+      setErrorMessage('Erro na requisição: ' + error.message);
       console.error('Erro na requisição:', error);
     }
+    
+    
   };
 
   return (
@@ -116,22 +132,23 @@ function CriarProprietario() {
         <Title>Proprietário</Title>
         <CloseButton onClick={handleCloseClick}>✖</CloseButton>
       </Header>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <Form onSubmit={handleSubmit}>
         <Label>
           Nome:
-          <Input type="text" name="nome" value={nome} onChange={(e) => setNome(e.target.value)} required />
+          <Input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required />
         </Label>
         <Label>
           CPF:
-          <Input type="text" name="cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} required />
+          <Input type="text" value={cpf} onChange={(e) => setCpf(e.target.value)} required />
         </Label>
         <Label>
           Categoria CNH:
-          <Input type="text" name="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)} required />
+          <Input type="text" value={categoria} onChange={(e) => setCategoria(e.target.value)} required />
         </Label>
         <Label>
           Vencimento CNH:
-          <Input type="date" name="vencimento" value={vencimento} onChange={(e) => setVencimento(e.target.value)} required />
+          <Input type="date" value={vencimento} onChange={(e) => setVencimento(e.target.value)} required />
         </Label>
         <SubmitButton type="submit">Criar</SubmitButton>
       </Form>

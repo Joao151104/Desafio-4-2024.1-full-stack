@@ -1,5 +1,5 @@
 // src/contexts/ProprietariosContext.js
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const ProprietariosContext = createContext();
 
@@ -8,56 +8,39 @@ export const useProprietarios = () => {
 };
 
 export const ProprietariosProvider = ({ children }) => {
-  const [proprietarios, setProprietarios] = useState([
-    {
-      nome: 'aristeu motorista',
-      cpf: '99999999999999',
-      categoria: 'B',
-      vencimento: '30/12/2028',
-      veiculos: '🚗',
-      multas: [
-        {
-          valor: 'R$ 200,00',
-          data: '29/10/2020',
-          pontos: 8,
-          tipo: 'excesso de velocidade',
-          placa: '33444',
-        },
-      ],
-    },
-    {
-      nome: 'aristeu motociclista',
-      cpf: '99999999999999',
-      categoria: 'A',
-      vencimento: '30/12/2028',
-      veiculos: '🏍️',
-      multas: [
-        {
-          valor: 'R$ 150,00',
-          data: '15/05/2021',
-          pontos: 5,
-          tipo: 'estacionamento proibido',
-          placa: '55555',
-        },
-      ],
-    },
-    {
-      nome: 'dona aristeia',
-      cpf: '99999999999999',
-      categoria: 'B',
-      vencimento: '30/12/2028',
-      veiculos: '🚗',
-      multas: [],
-    },
-    {
-      nome: 'sr aristeu',
-      cpf: '99999999999999',
-      categoria: 'B',
-      vencimento: '30/12/2028',
-      veiculos: '🚗',
-      multas: [],
-    },
-  ]);
+  const [proprietarios, setProprietarios] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProprietarios = async () => {
+      try {
+        const response = await fetch('http://localhost:8000/proprietario/');
+        if (!response.ok) {
+          throw new Error('Erro ao buscar dados');
+        }
+        const data = await response.json();
+
+        // Transformando os dados da API para o formato esperado pelo estado
+        const formattedData = data.map(proprietario => ({
+          nome: proprietario.nome,
+          cpf: proprietario.CPF,
+          categoria: proprietario.categoria_CNH,
+          vencimento: new Date(proprietario.vencimento_CNH).toLocaleDateString('pt-BR'),
+          veiculos: proprietario.veiculos.map(veiculo => `${veiculo.marca} ${veiculo.modelo} (${veiculo.ano})`),
+          multas: [], // Inicialmente sem multas, já que a estrutura fornecida não inclui multas
+        }));
+
+        setProprietarios(formattedData);
+      } catch (error) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProprietarios();
+  }, []);
 
   const addMulta = (index, novaMulta) => {
     const updatedProprietarios = [...proprietarios];
@@ -66,7 +49,7 @@ export const ProprietariosProvider = ({ children }) => {
   };
 
   return (
-    <ProprietariosContext.Provider value={{ proprietarios, addMulta }}>
+    <ProprietariosContext.Provider value={{ proprietarios, addMulta, loading, error }}>
       {children}
     </ProprietariosContext.Provider>
   );

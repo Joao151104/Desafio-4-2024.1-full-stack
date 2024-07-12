@@ -1,4 +1,3 @@
-// src/components/EditarMotorista.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -22,9 +21,7 @@ const Header = styled.header`
 
 const Title = styled.h1`
   font-size: 1.5em;
-
 `;
-
 
 const CloseButton = styled.button`
   background: none;
@@ -71,51 +68,66 @@ const SubmitButton = styled.button`
   }
 `;
 
-const motoristas = [
-  {
-    nome: 'aristeu motorista',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-  },
-  {
-    nome: 'aristeu motociclista',
-    cpf: '99999999999999',
-    categoria: 'A',
-    vencimento: '30/12/2028',
-  },
-  {
-    nome: 'dona aristeia',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-  },
-  {
-    nome: 'sr aristeu',
-    cpf: '99999999999999',
-    categoria: 'B',
-    vencimento: '30/12/2028',
-  },
-];
-
 function EditarMotorista() {
   const navigate = useNavigate();
-  const { motoristaId } = useParams();
-  const [motorista, setMotorista] = useState({});
+  const { cpf } = useParams(); // Obtém o CPF da URL usando useParams
+  const [motorista, setMotorista] = useState({
+    nome: '',
+    cpf: '',
+    categoria: '',
+    vencimento: '',
+  });
 
   useEffect(() => {
-    const motoristaToEdit = motoristas.find((m, index) => index === parseInt(motoristaId));
-    setMotorista(motoristaToEdit);
-  }, [motoristaId]);
+    // Função assíncrona para buscar dados do proprietário pelo CPF
+    const fetchProprietario = async () => {
+      try {
+        const response = await fetch(`http://localhost:8000/proprietario/${cpf}`);
+        if (response.ok) {
+          const data = await response.json();
+          // Atualiza o estado do motorista com os dados obtidos
+          setMotorista({
+            nome: data.nome,
+            cpf: data.cpf,
+            categoria: data.categoria,
+            vencimento: data.vencimento,
+          });
+        } else {
+          console.error('Erro ao buscar proprietário:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Erro na requisição:', error);
+      }
+    };
+
+    fetchProprietario();
+  }, [cpf]); // Executa sempre que o CPF mudar na URL
 
   const handleCloseClick = () => {
     navigate('/');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Lógica para enviar o formulário atualizado
-    navigate('/');
+
+    try {
+      const response = await fetch(`http://localhost:8000/proprietario/${cpf}`, {
+        method: 'PUT', // Método PUT para atualizar o proprietário
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(motorista), // Envia os dados atualizados do motorista
+      });
+
+      if (response.ok) {
+        console.log('Proprietário atualizado com sucesso');
+        navigate('/');
+      } else {
+        console.error('Erro ao atualizar proprietário:', response.statusText);
+      }
+    } catch (error) {
+      console.error('Erro na requisição:', error);
+    }
   };
 
   return (
@@ -130,7 +142,7 @@ function EditarMotorista() {
           <Input
             type="text"
             name="nome"
-            value={motorista?.nome || ''}
+            value={motorista.nome}
             onChange={(e) => setMotorista({ ...motorista, nome: e.target.value })}
             required
           />
@@ -140,9 +152,10 @@ function EditarMotorista() {
           <Input
             type="text"
             name="cpf"
-            value={motorista?.cpf || ''}
+            value={motorista.cpf}
             onChange={(e) => setMotorista({ ...motorista, cpf: e.target.value })}
             required
+            disabled // CPF não deve ser editável
           />
         </Label>
         <Label>
@@ -150,7 +163,7 @@ function EditarMotorista() {
           <Input
             type="text"
             name="categoria"
-            value={motorista?.categoria || ''}
+            value={motorista.categoria}
             onChange={(e) => setMotorista({ ...motorista, categoria: e.target.value })}
             required
           />
@@ -160,7 +173,7 @@ function EditarMotorista() {
           <Input
             type="date"
             name="vencimento"
-            value={motorista?.vencimento || ''}
+            value={motorista.vencimento}
             onChange={(e) => setMotorista({ ...motorista, vencimento: e.target.value })}
             required
           />

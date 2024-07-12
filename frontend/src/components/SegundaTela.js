@@ -1,10 +1,11 @@
-// src/components/SegundaTela.js
-import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
+import { useParams } from 'react-router-dom';
+import { useVeiculosCPF } from '../contexts/veiculosCPF'; // Importe correto para useVeiculosCPF
 
 const SegundaTelaWrapper = styled.div`
   text-align: center;
+  padding: 20px;
 `;
 
 const Header = styled.header`
@@ -13,13 +14,14 @@ const Header = styled.header`
   border-radius: 8px;
 `;
 
-const Title = styled.h1`
-  font-size: 2em;
+const SubTitle = styled.h2`
+  font-size: 1.5em;
+  margin-bottom: 20px;
 `;
 
 const Table = styled.table`
   width: 90%;
-  margin: 0 auto;
+  margin: 20px auto;
   border-collapse: collapse;
   border: 1px solid #ddd;
 
@@ -32,7 +34,7 @@ const Table = styled.table`
 
 const Th = styled.th`
   padding: 12px;
-  background-color: #007bff; /* Cor de fundo azul */
+  background-color: #6c63ff;
   color: white;
   border: 1px solid #ddd;
 `;
@@ -42,107 +44,42 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
-const Button = styled.button`
-  background-color: #6c63ff;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px;
-
-  &:hover {
-    background-color: #5548c8;
-  }
-`;
-
-const BackButton = styled(Button)`
-  background-color: #6c63ff;
-  &:hover {
-    background-color: #5548c8;
-  }
-`;
-
-const IconButton = styled.button`
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.5em;
-`;
-
-const vehicles = [
-  {
-    placa: '33444',
-    marca: 'Fiat',
-    modelo: 'Palio',
-    ano: 2010,
-    cor: 'Branco',
-    multas: '📖',
-  },
-  {
-    placa: '55555',
-    marca: 'Fiat',
-    modelo: 'Uno',
-    ano: 2010,
-    cor: 'Preto',
-    multas: '📖',
-  },
-];
-
 function SegundaTela() {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { nomeProprietario } = location.state;
+  const { cpf } = useParams();
+  const { veiculos, loading, error, fetchVeiculosByCPF } = useVeiculosCPF();
 
-  const handleBackClick = () => {
-    navigate('/');
-  };
-
-  const handleCreateClick = () => {
-    navigate('/criar-veiculo');
-  };
-
-  const handleEditClick = (index) => {
-    navigate(`/editar-veiculo/${index}`);
-  };
-
-  const handleMultaClick = (placa) => {
-    navigate(`/multas/${placa}`);
-  };
+  useEffect(() => {
+    fetchVeiculosByCPF(cpf);
+  }, [cpf, fetchVeiculosByCPF]); // Corrigido para incluir fetchVeiculosByCPF como dependência
 
   return (
     <SegundaTelaWrapper>
       <Header>
-        <Title>Veículos do {nomeProprietario}</Title>
-        <BackButton onClick={handleBackClick}>Voltar</BackButton>
-        <Button onClick={handleCreateClick}>Criar</Button>
+        <SubTitle>Veículos do Proprietário</SubTitle>
+        
         <Table>
           <thead>
             <tr>
-              <Th>Placa</Th>
               <Th>Marca</Th>
               <Th>Modelo</Th>
+              <Th>Placa</Th>
               <Th>Ano</Th>
               <Th>Cor</Th>
-              <Th>Multas</Th>
+              <Th>CPF</Th>
               <Th>Editar</Th>
             </tr>
           </thead>
           <tbody>
-            {vehicles.map((vehicle, index) => (
-              <tr key={index}>
-                <Td>{vehicle.placa}</Td>
-                <Td>{vehicle.marca}</Td>
-                <Td>{vehicle.modelo}</Td>
-                <Td>{vehicle.ano}</Td>
-                <Td>{vehicle.cor}</Td>
-                <Td>
-                  <IconButton onClick={() => handleMultaClick(vehicle.placa)}>{vehicle.multas}</IconButton>
-                </Td>
-                <Td>
-                  <IconButton onClick={() => handleEditClick(index)}>✏️</IconButton>
-                </Td>
+            {veiculos.map((veiculo) => (
+              <tr key={veiculo.id}>
+                <Td>{veiculo.marca}</Td>
+                <Td>{veiculo.modelo}</Td>
+                <Td>{veiculo.placa}</Td>
+                <Td>{veiculo.ano}</Td>
+                <Td>{veiculo.cor}</Td>
+                <Td>{veiculo.motorista_CPF}</Td>
+                <Td>✏️</Td>
+                {/* Adicione mais colunas conforme necessário */}
               </tr>
             ))}
           </tbody>

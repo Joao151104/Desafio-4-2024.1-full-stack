@@ -1,4 +1,3 @@
-// src/components/Home.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -13,8 +12,6 @@ const Header = styled.header`
   padding: 20px;
   border-radius: 8px;
 `;
-
-
 
 const SubTitle = styled.h2`
   font-size: 1.5em;
@@ -76,16 +73,17 @@ function Home() {
     navigate('/criar-proprietario');
   };
 
-  const handleCarClick = (index) => {
-    navigate(`/segunda-tela/${index}`);
+  const handleCarClick = (cpf) => {
+    navigate(`/segunda-tela/${cpf}`);
   };
 
-  const handleEditClick = (index) => {
-    navigate(`/editar-motorista/${index}`);
+  const handleEditClick = (cpf) => {
+    navigate(`/editar-proprietario/${cpf}`);
   };
 
-  const handleMultaClick = (index) => {
-    navigate(`/multas/${index}`);
+  const handleMultaClick = (cpf) => {
+    navigate(`/multa/${cpf}`);
+    console.log(`vendo multas de ${cpf}`);
   };
 
   return (
@@ -102,7 +100,7 @@ function Home() {
               <Th>Vencimento CNH</Th>
               <Th>Veículos</Th>
               <Th>Multas</Th>
-              <Th>Editar Motorista</Th>
+              <Th>Editar Proprietário</Th>
             </tr>
           </thead>
           <tbody>
@@ -113,15 +111,13 @@ function Home() {
                 <Td>{proprietario.categoria}</Td>
                 <Td>{proprietario.vencimento}</Td>
                 <Td>
-                  <IconButton onClick={() => handleCarClick(proprietario.nome)}>{proprietario.veiculos}</IconButton>
+                  <IconButton onClick={() => handleCarClick(proprietario.cpf)}>🚗</IconButton>
                 </Td>
                 <Td>
-                  <IconButton onClick={() => handleMultaClick(index)}>
-                    {proprietario.multas.length > 0 ? '📖' : '📄'}
-                  </IconButton>
+                  <IconButton onClick={() => handleMultaClick(proprietario.cpf)}>📖</IconButton>
                 </Td>
                 <Td>
-                  <IconButton onClick={() => handleEditClick(index)}>✏️</IconButton>
+                  <IconButton onClick={() => handleEditClick(proprietario.cpf)}>✏️</IconButton>
                 </Td>
               </tr>
             ))}

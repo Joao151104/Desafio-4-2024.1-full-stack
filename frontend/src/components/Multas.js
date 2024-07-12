@@ -1,65 +1,23 @@
-// src/components/Multas.js
-import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useProprietarios } from '../contexts/ProprietariosContext';
+import { useParams } from 'react-router-dom';
+import { useMultasCPF } from '../contexts/multaCPF';
+import { format } from 'date-fns'; // Importar a função format do date-fns
 
 const MultasWrapper = styled.div`
   text-align: center;
   padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 `;
 
 const Header = styled.header`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
 `;
 
-const Title = styled.h1`
+const SubTitle = styled.h2`
   font-size: 1.5em;
-`;
-
-const ButtonWrapper = styled.div`
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  padding: 10px;
-`;
-
-const BackButton = styled.button`
-  background-color: #6c63ff;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px;
-
-  &:hover {
-    background-color: #5548c8;
-  }
-`;
-
-const CreateButton = styled.button`
-  background-color: #6c63ff;
-  border: none;
-  color: white;
-  padding: 10px 20px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-  margin: 10px;
-
-  &:hover {
-    background-color: #5548c8;
-  }
+  margin-bottom: 20px;
 `;
 
 const Table = styled.table`
@@ -77,7 +35,8 @@ const Table = styled.table`
 
 const Th = styled.th`
   padding: 12px;
-  background-color: #ccc;
+  background-color: #6c63ff;
+  color: white;
   border: 1px solid #ddd;
 `;
 
@@ -86,52 +45,48 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
+// Função para formatar a data no formato desejado
+const formatDate = (date) => {
+  return format(new Date(date), 'dd/MM/yyyy');
+};
+
 function Multas() {
-  const navigate = useNavigate();
-  const { index } = useParams();
-  const { proprietarios } = useProprietarios();
+  const { cpf } = useParams();
+  const { multas, loading, error, fetchMultasByCPF } = useMultasCPF();
 
-  const handleBackClick = () => {
-    navigate('/');
-  };
-
-  const handleCreateClick = () => {
-    navigate(`/criar-multa/${index}`);
-  };
-
-  const multas = proprietarios[index].multas;
+  useEffect(() => {
+    fetchMultasByCPF(cpf);
+  }, [cpf, fetchMultasByCPF]);
 
   return (
     <MultasWrapper>
       <Header>
-        <Title>Multas do [Proprietario ou Veículo]</Title>
-      </Header>
-      <ButtonWrapper>
-        <BackButton onClick={handleBackClick}>Voltar</BackButton>
-        <CreateButton onClick={handleCreateClick}>Criar Multa</CreateButton>
-      </ButtonWrapper>
-      <Table>
-        <thead>
-          <tr>
-            <Th>Valor</Th>
-            <Th>Data</Th>
-            <Th>Pontos</Th>
-            <Th>Tipo</Th>
-            <Th>Placa Carro</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {multas.map((multa, index) => (
-            <tr key={index}>
-              <Td>{multa.valor}</Td>
-              <Td>{multa.data}</Td>
-              <Td>{multa.pontos}</Td>
-              <Td>{multa.tipo}</Td>
-              <Td>{multa.placa}</Td>
+        <SubTitle>Multas do Proprietário</SubTitle>
+       
+
+        <Table>
+          <thead>
+            <tr>
+              <Th>Valor</Th>
+              <Th>Data</Th>
+              <Th>Pontos</Th>
+              <Th>Tipo</Th>
+              <Th>Placa do Veículo</Th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
+          </thead>
+          <tbody>
+            {multas.map((multa) => (
+              <tr key={multa.id}>
+                <Td>{multa.valor}</Td>
+                <Td>{formatDate(multa.data)}</Td> {/* Utiliza a função formatDate para exibir a data formatada */}
+                <Td>{multa.pontos_penalidade}</Td>
+                <Td>{multa.tipo_infracao}</Td>
+                <Td>{multa.veiculo_placa}</Td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      </Header>
     </MultasWrapper>
   );
 }
