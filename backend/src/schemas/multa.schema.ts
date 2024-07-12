@@ -14,8 +14,7 @@ export const MultaCreateSchema = z.object({
     'Não utilizar cinto de segurança',
     'Avançar o sinal vermelho'
   ]),
-  veiculoId: z.string().uuid(),
-  infratorCPF: z.string().regex(/^\d{11}$/) // CPF deve ser uma string com 11 dígitos numéricos
+  veiculoId: z.string().uuid()
 });
 
 export const MultaUpdateSchema = z.object({
@@ -33,8 +32,8 @@ export const MultaUpdateSchema = z.object({
   veiculoId: z.string().uuid().optional(), // VeiculoId é opcional para atualização
 });
 
-// Define o MultaCreateDTO com base no esquema MultaCreateSchema
-export type MultaCreateDTO = z.infer<typeof MultaCreateSchema>;
+export const MultaIdSchema = z.string().uuid();
 
-// Define o MultaUpdateDTO com base no esquema MultaUpdateSchema
+// Inferir tipos para os DTOs
+export type MultaCreateDTO = z.infer<typeof MultaCreateSchema>;
 export type MultaUpdateDTO = z.infer<typeof MultaUpdateSchema>;

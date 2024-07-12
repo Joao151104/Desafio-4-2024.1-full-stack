@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useVeiculosCPF } from '../contexts/veiculosCPF'; // Importe correto para useVeiculosCPF
+import { useVeiculosCPF } from '../contexts/veiculosCPF';
 
 const SegundaTelaWrapper = styled.div`
   text-align: center;
@@ -51,10 +51,21 @@ const IconButton = styled.button`
   font-size: 1.5em;
 `;
 
+const CreateButton = styled.button`
+  background-color: #6c63ff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  margin-bottom: 10px;
+`;
+
 function SegundaTela() {
   const { cpf } = useParams();
   const { veiculos, loading, error, fetchVeiculosByCPF } = useVeiculosCPF();
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchVeiculosByCPF(cpf);
@@ -64,11 +75,17 @@ function SegundaTela() {
     navigate(`/editar-veiculo/${placa}`);
   };
 
+  const handleCreateClick = () => {
+    navigate('/criar-veiculo');
+  };
+
   return (
     <SegundaTelaWrapper>
       <Header>
         <SubTitle>Veículos do Proprietário</SubTitle>
         
+        <CreateButton onClick={handleCreateClick}>Criar Novo Veículo</CreateButton>
+
         <Table>
           <thead>
             <tr>

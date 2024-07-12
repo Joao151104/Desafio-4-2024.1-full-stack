@@ -2,20 +2,23 @@
 
 import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
-import { ProprietarioCreateInput, ProprietarioUpdateInput } from '../schemas/proprietario.schema';
+import { ProprietarioCreateSchema, ProprietarioUpdateSchema } from '../schemas/proprietario.schema';
 
 const prisma = new PrismaClient();
 
+// Função para listar todos os proprietários
 export async function listarProprietarios() {
-  return await prisma.proprietario.findMany({
+  const proprietarios = await prisma.proprietario.findMany({
     include: {
       veiculos: true,
     },
   });
+  return proprietarios;
 }
 
+// Função para encontrar um proprietário pelo CPF
 export async function encontrarProprietarioPorCPF(cpf: string) {
-  return await prisma.proprietario.findUnique({
+  const proprietario = await prisma.proprietario.findUnique({
     where: {
       CPF: cpf,
     },
@@ -23,11 +26,23 @@ export async function encontrarProprietarioPorCPF(cpf: string) {
       veiculos: true,
     },
   });
+  return proprietario;
 }
 
-export async function criarProprietario(data: ProprietarioCreateInput) {
+// Função para criar um novo proprietário
+export async function criarProprietario(data: { nome: string; cpf: string; categoria: string; vencimento: string }) {
   const { nome, cpf, categoria, vencimento } = data;
+
+  // Convertendo vencimento para Date
   const vencimentoDate = new Date(vencimento);
+
+  // Validar os dados utilizando o schema
+  const validatedData = ProprietarioCreateSchema.parse({
+    nome,
+    cpf,
+    categoria,
+    vencimento: vencimentoDate.toISOString(),
+  });
 
   try {
     const proprietario = await prisma.proprietario.create({
@@ -48,14 +63,23 @@ export async function criarProprietario(data: ProprietarioCreateInput) {
   }
 }
 
-export async function atualizarProprietario(cpf: string, data: ProprietarioUpdateInput) {
-  const { nome, cpf: novoCPF, categoria, vencimento } = data; // Renomeie para novoCPF para distinguir do CPF atual
+// Função para atualizar um proprietário
+export async function atualizarProprietario(cpf: string, data: { nome?: string; categoria?: string; vencimento?: string }) {
+  const { nome, categoria, vencimento } = data;
 
+  // Criar um objeto de atualização vazio
   const updateData: any = {};
+
+  // Adicionar campos ao objeto de atualização se forem fornecidos
   if (nome) updateData.nome = nome;
   if (categoria) updateData.categoria_CNH = categoria;
   if (vencimento) updateData.vencimento_CNH = new Date(vencimento);
-  if (novoCPF) updateData.CPF = novoCPF; // Inclui o novo CPF na atualização, se fornecido
+
+  // Validar os dados utilizando o schema
+  const validatedData = ProprietarioUpdateSchema.parse({
+    cpf,
+    ...updateData,
+  });
 
   try {
     const proprietario = await prisma.proprietario.update({
@@ -74,14 +98,11 @@ export async function atualizarProprietario(cpf: string, data: ProprietarioUpdat
   }
 }
 
+// Função para deletar um proprietário
 export async function deletarProprietario(cpf: string) {
-  try {
-    await prisma.proprietario.delete({
-      where: {
-        CPF: cpf,
-      },
-    });
-  } catch (error) {
-    throw new createHttpError.BadRequest('Erro ao deletar o proprietário');
-  }
+  await prisma.proprietario.delete({
+    where: {
+      CPF: cpf,
+    },
+  });
 }

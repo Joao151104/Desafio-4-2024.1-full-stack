@@ -40,14 +40,11 @@ model Veiculo {
 }
 
 model Multa {
-  multaID           Int       @id @default(autoincrement())
-  valor             Float     @db.Float()
-  data              DateTime  @db.Date
+  multaID         Int      @id @default(autoincrement())
+  valor           Float    @db.Float()
+  data            DateTime @db.Date
   pontos_penalidade Int
-  tipo_infracao     String    @db.VarChar(255)
-  veiculo_placa     String?   @db.Char(7)
-  veiculo           Veiculo?  @relation(fields: [veiculo_placa], references: [placa])
-  infrator_CPF      String    @db.Char(11)
- 
+  tipo_infracao   String   @db.VarChar(255)
+  veiculo_placa   String?  @db.Char(7)
+  veiculo         Veiculo? @relation(fields: [veiculo_placa], references: [placa])
 }
-

@@ -9,84 +9,46 @@ import {
   deletarProprietario,
 } from '../business/proprietario.business';
 import createHttpError from 'http-errors';
-import { ProprietarioUpdateInput } from '../schemas/proprietario.schema'; // Importe os tipos corretamente
+import { ProprietarioCreateSchema } from '../schemas/proprietario.schema';
 
 const router = Router();
 
 router.get('/', async (req, res) => {
-  try {
-    const proprietarios = await listarProprietarios();
-    res.status(200).json(proprietarios);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  const proprietarios = await listarProprietarios();
+  return res.status(200).json(proprietarios);
 });
 
 router.get('/:cpf', async (req, res) => {
   const cpf = req.params.cpf;
-  try {
-    const proprietario = await encontrarProprietarioPorCPF(cpf);
-    if (!proprietario) {
-      throw new createHttpError.NotFound('Proprietário não encontrado');
-    }
-    res.status(200).json(proprietario);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  const proprietario = await encontrarProprietarioPorCPF(cpf);
+  if (!proprietario) {
+    throw new createHttpError.NotFound('Proprietário não encontrado');
   }
+  return res.status(200).json(proprietario);
 });
 
 router.post('/', async (req, res) => {
-  const { nome, cpf, categoria, vencimento } = req.body;
-
-  try {
-    // Validação dos dados recebidos
-    if (!nome || !cpf || !categoria || !vencimento) {
-      throw new Error('Por favor, preencha todos os campos obrigatórios.');
-    }
-
-    const formattedVencimento = new Date(vencimento); // Certifique-se de que está convertendo corretamente
-
-    const proprietario = await criarProprietario({ nome, cpf, categoria, vencimento });
-
-    res.status(201).json(proprietario);
-  } catch (error) {
-    console.error('Erro ao criar proprietário:', error);
-    res.status(400).json({ message: error.message || 'Erro ao criar o proprietário.' });
-  }
+  const { nome, cpf, categoria, vencimento } = ProprietarioCreateSchema.parse(req.body);
+  const proprietario = await criarProprietario({ nome, cpf, categoria, vencimento });
+  return res.status(201).json(proprietario);
 });
 
 router.put('/:cpf', async (req, res) => {
   const cpf = req.params.cpf;
-  const { nome, cpf: novoCPF, categoria, vencimento } = req.body as ProprietarioUpdateInput; // Corrija para usar ProprietarioUpdateInput
+  const { nome, categoria, vencimento } = req.body;
 
-  try {
-    // Validação dos dados recebidos
-    if (!nome || !categoria || !vencimento) {
-      throw new Error('Por favor, preencha todos os campos obrigatórios.');
-    }
+  const proprietario = await atualizarProprietario(cpf, { nome, categoria, vencimento });
 
-    // Atualizar o proprietário no banco de dados
-    const proprietario = await atualizarProprietario(cpf, { nome, cpf: novoCPF, categoria, vencimento });
-
-    if (!proprietario) {
-      throw new createHttpError.NotFound('Proprietário não encontrado');
-    }
-
-    res.status(200).json(proprietario);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+  if (!proprietario) {
+    throw new createHttpError.NotFound('Proprietário não encontrado');
   }
+  return res.status(200).json(proprietario);
 });
 
 router.delete('/:cpf', async (req, res) => {
   const cpf = req.params.cpf;
-
-  try {
-    await deletarProprietario(cpf);
-    res.status(204).end();
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+  await deletarProprietario(cpf);
+  return res.status(204).json();
 });
 
 export default router;

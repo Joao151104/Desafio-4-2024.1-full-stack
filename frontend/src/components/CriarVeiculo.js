@@ -1,5 +1,6 @@
-// src/components/CriarVeiculo.js
-import React from 'react';
+// CriarVeiculo.jsx
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
@@ -71,43 +72,84 @@ const SubmitButton = styled.button`
 
 function CriarVeiculo() {
   const navigate = useNavigate();
+  const [cpfProprietario, setCpfProprietario] = useState('');
+  const [placa, setPlaca] = useState('');
+  const [marca, setMarca] = useState('');
+  const [modelo, setModelo] = useState('');
+  const [ano, setAno] = useState('');
+  const [cor, setCor] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleCloseClick = () => {
-    navigate('/segunda-tela');
+    navigate('/');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Lógica para enviar o formulário
-    navigate('/segunda-tela');
+
+    const novoVeiculo = {
+      placa,
+      marca,
+      modelo,
+      ano: Number(ano),
+      cor,
+      motorista_CPF: cpfProprietario // Certifique-se de que está sendo enviado corretamente
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/veiculo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoVeiculo),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Erro ao criar veículo');
+      }
+
+      console.log('Veículo criado com sucesso');
+      navigate(`/segunda-tela/${cpfProprietario}`);
+    } catch (error) {
+      setErrorMessage('Erro ao criar veículo: ' + error.message);
+      console.error('Erro ao criar veículo:', error);
+    }
   };
 
   return (
     <FormWrapper>
       <Header>
-        <Title>Veículo do [proprietario]</Title>
+        <Title>Criar Veículo</Title>
         <CloseButton onClick={handleCloseClick}>✖</CloseButton>
       </Header>
+      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
       <Form onSubmit={handleSubmit}>
         <Label>
           Placa:
-          <Input type="text" name="placa" required />
+          <Input type="text" value={placa} onChange={(e) => setPlaca(e.target.value)} required />
         </Label>
         <Label>
           Marca:
-          <Input type="text" name="marca" required />
+          <Input type="text" value={marca} onChange={(e) => setMarca(e.target.value)} required />
         </Label>
         <Label>
           Modelo:
-          <Input type="text" name="modelo" required />
+          <Input type="text" value={modelo} onChange={(e) => setModelo(e.target.value)} required />
         </Label>
         <Label>
           Ano:
-          <Input type="number" name="ano" required />
+          <Input type="number" value={ano} onChange={(e) => setAno(e.target.value)} required />
         </Label>
         <Label>
           Cor:
-          <Input type="text" name="cor" required />
+          <Input type="text" value={cor} onChange={(e) => setCor(e.target.value)} required />
+        </Label>
+        <Label>
+          CPF do Proprietário:
+          <Input type="number" value={cpfProprietario} onChange={(e) => setCpfProprietario(e.target.value)} required />
         </Label>
         <SubmitButton type="submit">Criar</SubmitButton>
       </Form>
