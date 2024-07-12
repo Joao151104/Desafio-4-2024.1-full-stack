@@ -14,6 +14,13 @@ const Header = styled.header`
   border-radius: 8px;
 `;
 
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+`;
+
 const SubTitle = styled.h2`
   font-size: 1.5em;
   margin-bottom: 20px;
@@ -60,6 +67,7 @@ const CreateButton = styled.button`
   cursor: pointer;
   font-size: 1em;
   margin-bottom: 10px;
+  margin-left: 50px;
 `;
 
 function SegundaTela() {
@@ -72,6 +80,8 @@ function SegundaTela() {
   }, [cpf, fetchVeiculosByCPF]);
 
   const handleEditClick = (placa) => {
+    // Armazena o CPF no localStorage antes de navegar para a página de edição
+    localStorage.setItem('cpf', cpf);
     navigate(`/editar-veiculo/${placa}`);
   };
 
@@ -79,13 +89,16 @@ function SegundaTela() {
     navigate('/criar-veiculo');
   };
 
+  const handleCloseClick = () => {
+    navigate('/');
+  };
+
   return (
     <SegundaTelaWrapper>
       <Header>
         <SubTitle>Veículos do Proprietário</SubTitle>
-        
+        <CreateButton onClick={handleCloseClick}>Voltar</CreateButton>
         <CreateButton onClick={handleCreateClick}>Criar Novo Veículo</CreateButton>
-
         <Table>
           <thead>
             <tr>

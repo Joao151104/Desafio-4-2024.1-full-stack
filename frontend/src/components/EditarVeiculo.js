@@ -72,6 +72,7 @@ function EditarVeiculo() {
   const navigate = useNavigate();
   const { placa } = useParams(); // Acessa o parâmetro de rota 'placa'
   const [veiculo, setVeiculo] = useState({});
+  const [cpf, setCpf] = useState(''); // Adiciona estado para o CPF
 
   useEffect(() => {
     const fetchVeiculo = async () => {
@@ -85,6 +86,7 @@ function EditarVeiculo() {
         }
         const data = await response.json();
         setVeiculo(data); // Atualiza o estado com os dados do veículo
+        setCpf(data.motorista_CPF); // Atualiza o estado do CPF com os dados do veículo
       } catch (error) {
         console.error('Erro ao buscar veículo:', error);
       }
@@ -94,7 +96,9 @@ function EditarVeiculo() {
   }, [placa]);
 
   const handleCloseClick = () => {
-    navigate('/segunda-tela');
+    const cpfFromStorage = localStorage.getItem('cpf');
+    localStorage.removeItem('cpf'); // Remove o CPF do localStorage
+    navigate(`/segunda-tela/${cpfFromStorage}`);
   };
 
   const handleSubmit = async (event) => {
@@ -112,7 +116,7 @@ function EditarVeiculo() {
         throw new Error('Erro ao atualizar veículo');
       }
 
-      navigate('/segunda-tela'); // Redireciona após o sucesso
+      navigate(`/segunda-tela/${cpf}`); // Redireciona após o sucesso
     } catch (error) {
       console.error('Erro ao editar veículo:', error);
       // Tratamento de erro: exibir mensagem para o usuário, etc.

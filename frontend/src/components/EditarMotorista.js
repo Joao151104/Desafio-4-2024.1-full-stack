@@ -97,7 +97,7 @@ function EditarVeiculo() {
   }, [cpf]);
 
   const handleCloseClick = () => {
-    navigate('/segunda-tela');
+    navigate('/');
   };
 
   const handleSubmit = async (event) => {

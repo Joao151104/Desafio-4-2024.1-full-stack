@@ -40,7 +40,7 @@ function App() {
           <VeiculosCPFProvider> {/* Corrigido o componente de contexto VeiculosCPFProvider */}
             <MultasCPFProvider> {/* Fornecendo o contexto MultasCPFProvider corretamente */}
               <Routes>
-                <Route path="/" element={<Home />} />
+                <Route exact path="/" element={<Home />} />
                 <Route path="/segunda-tela/:cpf" element={<SegundaTela />} />
                 <Route path="/criar-proprietario" element={<CriarProprietario />} />
                 <Route path="/criar-veiculo" element={<CriarVeiculo />} />
