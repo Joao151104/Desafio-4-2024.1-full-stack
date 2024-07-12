@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useVeiculosCPF } from '../contexts/veiculosCPF'; // Importe correto para useVeiculosCPF
 
 const SegundaTelaWrapper = styled.div`
@@ -44,13 +44,25 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+`;
+
 function SegundaTela() {
   const { cpf } = useParams();
   const { veiculos, loading, error, fetchVeiculosByCPF } = useVeiculosCPF();
+  const navigate = useNavigate(); // Hook para navegação
 
   useEffect(() => {
     fetchVeiculosByCPF(cpf);
-  }, [cpf, fetchVeiculosByCPF]); // Corrigido para incluir fetchVeiculosByCPF como dependência
+  }, [cpf, fetchVeiculosByCPF]);
+
+  const handleEditClick = (placa) => {
+    navigate(`/editar-veiculo/${placa}`);
+  };
 
   return (
     <SegundaTelaWrapper>
@@ -78,8 +90,9 @@ function SegundaTela() {
                 <Td>{veiculo.ano}</Td>
                 <Td>{veiculo.cor}</Td>
                 <Td>{veiculo.motorista_CPF}</Td>
-                <Td>✏️</Td>
-                {/* Adicione mais colunas conforme necessário */}
+                <Td>
+                  <IconButton onClick={() => handleEditClick(veiculo.placa)}>✏️</IconButton>
+                </Td>
               </tr>
             ))}
           </tbody>

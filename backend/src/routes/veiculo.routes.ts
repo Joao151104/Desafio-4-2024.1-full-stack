@@ -1,5 +1,3 @@
-// veiculo.routes.js
-
 import { Router } from 'express';
 import createHttpError from 'http-errors';
 import {
@@ -8,13 +6,22 @@ import {
   findVeiculoByPlaca,
   updateVeiculo,
   deleteVeiculo,
-  listVeiculosByCPF // Atualizamos o nome da função aqui
+  findVeiculosByCPF // Importe a função de busca por CPF aqui
 } from '../business/veiculo.business';
-import { VeiculoCreateSchema, VeiculoPlacaSchema, cpfSchema } from '../schemas/veiculo.schema';
+import { VeiculoCreateSchema, VeiculoPlacaSchema, VeiculoUpdateSchema } from '../schemas/veiculo.schema';
 
 const router = Router();
 
-// Rota para listar todos os veículos
+// Middleware para validar e normalizar dados de veículo
+function validateVeiculoData(schema: any, data: any) {
+  try {
+    const validatedData = schema.parse(data);
+    return validatedData;
+  } catch (error) {
+    throw new createHttpError.BadRequest('Dados inválidos para veículo');
+  }
+}
+
 router.get('/', async (req, res) => {
   try {
     const veiculos = await listVeiculos();
@@ -24,7 +31,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Rota para encontrar um veículo pela placa
 router.get('/placa/:placa', async (req, res) => {
   try {
     const placa = VeiculoPlacaSchema.parse(req.params.placa);
@@ -43,12 +49,11 @@ router.get('/placa/:placa', async (req, res) => {
   }
 });
 
-// Rota para listar veículos pelo CPF do motorista
 router.get('/cpf/:cpf', async (req, res) => {
   try {
-    const cpf = cpfSchema.parse(req.params.cpf);
+    const cpf = req.params.cpf;
 
-    const veiculos = await listVeiculosByCPF(cpf); // Atualizamos aqui para usar listVeiculosByCPF
+    const veiculos = await findVeiculosByCPF(cpf);
     if (veiculos.length === 0) {
       throw new createHttpError.NotFound('Nenhum veículo encontrado para este CPF');
     }
@@ -62,12 +67,21 @@ router.get('/cpf/:cpf', async (req, res) => {
   }
 });
 
-// Rota para criar um novo veículo
 router.post('/', async (req, res) => {
   try {
-    const { placa, marca, modelo, ano, cor, motorista_CPF } = VeiculoCreateSchema.parse(req.body);
+    const { placa, marca, modelo, ano, cor, motorista_CPF } = req.body;
 
-    const veiculo = await createVeiculo({ placa, marca, modelo, ano, cor, motorista_CPF });
+    const veiculoData = {
+      placa,
+      marca,
+      modelo,
+      ano,
+      cor,
+      motorista_CPF
+    };
+
+    const validatedData = validateVeiculoData(VeiculoCreateSchema, veiculoData);
+    const veiculo = await createVeiculo(validatedData);
     return res.status(201).json(veiculo);
   } catch (error) {
     if (error instanceof createHttpError.HttpError) {
@@ -77,13 +91,22 @@ router.post('/', async (req, res) => {
   }
 });
 
-// Rota para atualizar um veículo
 router.put('/:placa', async (req, res) => {
   try {
     const placa = VeiculoPlacaSchema.parse(req.params.placa);
     const { marca, modelo, ano, cor, motorista_CPF } = req.body;
 
-    const veiculo = await updateVeiculo(placa, marca, modelo, ano, cor, motorista_CPF);
+    const veiculoData = {
+      marca,
+      modelo,
+      ano,
+      cor,
+      motorista_CPF
+    };
+
+    const validatedData = validateVeiculoData(VeiculoUpdateSchema, veiculoData);
+    const veiculo = await updateVeiculo(placa, validatedData);
+    
     if (!veiculo) {
       throw new createHttpError.NotFound('Veículo não encontrado');
     }
@@ -97,7 +120,6 @@ router.put('/:placa', async (req, res) => {
   }
 });
 
-// Rota para deletar um veículo
 router.delete('/:placa', async (req, res) => {
   try {
     const placa = VeiculoPlacaSchema.parse(req.params.placa);

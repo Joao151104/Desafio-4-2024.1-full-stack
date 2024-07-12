@@ -11,11 +11,11 @@ const FormWrapper = styled.div`
 `;
 
 const Header = styled.header`
-  width: 80%;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
+  padding: 10px;
   border-bottom: 1px solid #ddd;
 `;
 
@@ -68,111 +68,123 @@ const SubmitButton = styled.button`
   }
 `;
 
-function EditarMotorista() {
+function EditarVeiculo() {
   const navigate = useNavigate();
-  const { cpf } = useParams(); // Obtém o CPF da URL usando useParams
-  const [motorista, setMotorista] = useState({
-    nome: '',
-    cpf: '',
-    categoria: '',
-    vencimento: '',
+  const { cpf } = useParams();
+  const [veiculo, setVeiculo] = useState({
+    placa: '',
+    marca: '',
+    modelo: '',
+    ano: '',
+    cor: '',
   });
 
   useEffect(() => {
-    // Função assíncrona para buscar dados do proprietário pelo CPF
-    const fetchProprietario = async () => {
+    const fetchVeiculo = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/proprietario/${cpf}`);
-        if (response.ok) {
-          const data = await response.json();
-          // Atualiza o estado do motorista com os dados obtidos
-          setMotorista(data);
-        } else {
-          console.error('Erro ao buscar proprietário:', response.statusText);
+        const response = await fetch(`http://localhost:8000/veiculo/${cpf}`);
+        if (!response.ok) {
+          throw new Error('Erro ao buscar veículo');
         }
+        const data = await response.json();
+        setVeiculo(data);
       } catch (error) {
-        console.error('Erro na requisição:', error);
+        console.error('Erro ao buscar veículo:', error);
       }
     };
 
-    fetchProprietario();
-  }, [cpf]); // Executa sempre que o CPF mudar na URL
+    fetchVeiculo();
+  }, [cpf]);
 
   const handleCloseClick = () => {
-    navigate('/');
+    navigate('/segunda-tela');
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     try {
-      const response = await fetch(`http://localhost:8000/proprietario/${cpf}`, {
-        method: 'PUT', // Método PUT para atualizar o proprietário
+      const response = await fetch(`http://localhost:8000/veiculo/${cpf}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(motorista), // Envia os dados atualizados do motorista
+        body: JSON.stringify({
+          marca: veiculo.marca,
+          modelo: veiculo.modelo,
+          ano: parseInt(veiculo.ano),
+          cor: veiculo.cor,
+        }),
       });
 
-      if (response.ok) {
-        console.log('Proprietário atualizado com sucesso');
-        navigate('/');
-      } else {
-        console.error('Erro ao atualizar proprietário:', response.statusText);
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar veículo');
       }
+
+      navigate('/segunda-tela');
     } catch (error) {
-      console.error('Erro na requisição:', error);
+      console.error('Erro ao editar veículo:', error);
+      // Tratar erro (ex: exibir mensagem para usuário)
     }
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setMotorista({ ...motorista, [name]: value });
+    setVeiculo({ ...veiculo, [name]: value });
   };
 
   return (
     <FormWrapper>
       <Header>
-        <Title>Editar Proprietário</Title>
+        <Title>Editar Veículo</Title>
         <CloseButton onClick={handleCloseClick}>✖</CloseButton>
       </Header>
       <Form onSubmit={handleSubmit}>
         <Label>
-          Nome:
+          Placa:
           <Input
             type="text"
-            name="nome"
-            value={motorista.nome}
+            name="placa"
+            value={veiculo.placa }
+            onChange={handleChange}
+            readOnly
+          />
+        </Label>
+        <Label>
+          Marca:
+          <Input
+            type="text"
+            name="marca"
+            value={veiculo.marca || ''}
             onChange={handleChange}
             required
           />
         </Label>
         <Label>
-          CPF:
+          Modelo:
           <Input
             type="text"
-            name="cpf"
-            value={motorista.cpf}
+            name="modelo"
+            value={veiculo.modelo || ''}
             onChange={handleChange}
             required
           />
         </Label>
         <Label>
-          Categoria CNH:
+          Ano:
           <Input
-            type="text"
-            name="categoria"
-            value={motorista.categoria}
+            type="number"
+            name="ano"
+            value={veiculo.ano || ''}
             onChange={handleChange}
             required
           />
         </Label>
         <Label>
-          Vencimento CNH:
+          Cor:
           <Input
-            type="date"
-            name="vencimento"
-            value={motorista.vencimento}
+            type="text"
+            name="cor"
+            value={veiculo.cor || ''}
             onChange={handleChange}
             required
           />
@@ -183,4 +195,4 @@ function EditarMotorista() {
   );
 }
 
-export default EditarMotorista;
+export default EditarVeiculo;

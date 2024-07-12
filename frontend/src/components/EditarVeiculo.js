@@ -1,4 +1,3 @@
-// src/components/EditarVeiculo.js
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -69,43 +68,60 @@ const SubmitButton = styled.button`
   }
 `;
 
-const veiculos = [
-  {
-    placa: '33444',
-    marca: 'Fiat',
-    modelo: 'Palio',
-    ano: 2010,
-    cor: 'Branco',
-    multas: '📖',
-  },
-  {
-    placa: '55555',
-    marca: 'Fiat',
-    modelo: 'Uno',
-    ano: 2010,
-    cor: 'Preto',
-    multas: '📖',
-  },
-];
-
 function EditarVeiculo() {
   const navigate = useNavigate();
-  const { veiculoId } = useParams();
+  const { placa } = useParams(); // Acessa o parâmetro de rota 'placa'
   const [veiculo, setVeiculo] = useState({});
 
   useEffect(() => {
-    const veiculoToEdit = veiculos.find((v, index) => index === parseInt(veiculoId));
-    setVeiculo(veiculoToEdit);
-  }, [veiculoId]);
+    const fetchVeiculo = async () => {
+      try {
+        if (!placa) {
+          throw new Error('Placa não definida na rota');
+        }
+        const response = await fetch(`http://localhost:8000/veiculo/placa/${placa}`);
+        if (!response.ok) {
+          throw new Error('Erro ao buscar veículo');
+        }
+        const data = await response.json();
+        setVeiculo(data); // Atualiza o estado com os dados do veículo
+      } catch (error) {
+        console.error('Erro ao buscar veículo:', error);
+      }
+    };
+  
+    fetchVeiculo();
+  }, [placa]);
 
   const handleCloseClick = () => {
     navigate('/segunda-tela');
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    // Lógica para enviar o formulário atualizado
-    navigate('/segunda-tela');
+    try {
+      const response = await fetch(`http://localhost:8000/veiculo/placa/${placa}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(veiculo), // Envia os dados do veículo atualizados
+      });
+
+      if (!response.ok) {
+        throw new Error('Erro ao atualizar veículo');
+      }
+
+      navigate('/segunda-tela'); // Redireciona após o sucesso
+    } catch (error) {
+      console.error('Erro ao editar veículo:', error);
+      // Tratamento de erro: exibir mensagem para o usuário, etc.
+    }
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setVeiculo({ ...veiculo, [name]: value });
   };
 
   return (
@@ -120,8 +136,8 @@ function EditarVeiculo() {
           <Input
             type="text"
             name="placa"
-            value={veiculo?.placa || ''}
-            onChange={(e) => setVeiculo({ ...veiculo, placa: e.target.value })}
+            value={veiculo.placa || ''}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -130,8 +146,8 @@ function EditarVeiculo() {
           <Input
             type="text"
             name="marca"
-            value={veiculo?.marca || ''}
-            onChange={(e) => setVeiculo({ ...veiculo, marca: e.target.value })}
+            value={veiculo.marca || ''}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -140,8 +156,8 @@ function EditarVeiculo() {
           <Input
             type="text"
             name="modelo"
-            value={veiculo?.modelo || ''}
-            onChange={(e) => setVeiculo({ ...veiculo, modelo: e.target.value })}
+            value={veiculo.modelo || ''}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -150,8 +166,8 @@ function EditarVeiculo() {
           <Input
             type="number"
             name="ano"
-            value={veiculo?.ano || ''}
-            onChange={(e) => setVeiculo({ ...veiculo, ano: e.target.value })}
+            value={veiculo.ano || ''}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -160,8 +176,8 @@ function EditarVeiculo() {
           <Input
             type="text"
             name="cor"
-            value={veiculo?.cor || ''}
-            onChange={(e) => setVeiculo({ ...veiculo, cor: e.target.value })}
+            value={veiculo.cor || ''}
+            onChange={handleChange}
             required
           />
         </Label>

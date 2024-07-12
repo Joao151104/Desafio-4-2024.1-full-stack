@@ -1,65 +1,71 @@
-// veiculo.business.js
+// src/business/veiculo.business.ts
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Veiculo } from '@prisma/client';
 import createHttpError from 'http-errors';
-import { VeiculoCreateSchema, VeiculoPlacaSchema, VeiculoUpdateSchema, cpfSchema } from '../schemas/veiculo.schema';
+import { VeiculoCreateSchema, VeiculoPlacaSchema } from '../schemas/veiculo.schema';
 
 const prisma = new PrismaClient();
 
-// Função para listar todos os veículos
-export async function listVeiculos() {
-  const veiculos = await prisma.veiculo.findMany();
-  return veiculos;
+/**
+ * Retorna todos os veículos cadastrados.
+ * @returns Promise<Veiculo[]> Array de veículos.
+ */
+export async function listVeiculos(): Promise<Veiculo[]> {
+  return await prisma.veiculo.findMany();
 }
 
-// Função para encontrar um veículo pela placa
-export async function findVeiculoByPlaca(placa: string) {
+/**
+ * Busca um veículo pelo número da placa.
+ * @param placa Número da placa do veículo.
+ * @returns Promise<Veiculo | null> Veículo encontrado ou null se não encontrado.
+ */
+export async function findVeiculoByPlaca(placa: string): Promise<Veiculo | null> {
   const parsedPlaca = VeiculoPlacaSchema.parse(placa);
-  const veiculo = await prisma.veiculo.findUnique({
+  return await prisma.veiculo.findUnique({
     where: {
       placa: parsedPlaca,
     },
   });
-  return veiculo;
 }
 
-// Função para listar veículos pelo CPF do motorista
-export async function listVeiculosByCPF(cpf: string) {
-  const parsedCPF = cpfSchema.parse(cpf);
-  const veiculos = await prisma.veiculo.findMany({
-    where: {
-      motorista_CPF: parsedCPF,
-    },
-  });
-  return veiculos;
-}
-
-// Função para criar um novo veículo
-export async function createVeiculo(data: any) {
-  const validatedData = VeiculoCreateSchema.parse(data);
-
+/**
+ * Busca todos os veículos associados a um CPF de motorista.
+ * @param cpf Número do CPF do motorista.
+ * @returns Promise<Veiculo[]> Array de veículos associados ao CPF.
+ */
+export async function findVeiculosByCPF(cpf: string): Promise<Veiculo[]> {
   try {
-    const veiculo = await prisma.veiculo.create({
-      data: validatedData,
+    const veiculos = await prisma.veiculo.findMany({
+      where: {
+        motorista_CPF: cpf,
+      },
     });
-    return veiculo;
+    return veiculos;
   } catch (error) {
-    throw new createHttpError.BadRequest('Erro ao criar o veículo');
+    throw new createHttpError.InternalServerError('Erro ao buscar veículos por CPF');
   }
 }
 
-// Função para atualizar um veículo
-export async function updateVeiculo(placa: string, marca?: string, modelo?: string, ano?: number, cor?: string, motorista_CPF?: string) {
+/**
+ * Cria um novo veículo com os dados fornecidos.
+ * @param data Dados do veículo a serem criados.
+ * @returns Promise<Veiculo> Veículo criado.
+ */
+export async function createVeiculo(data: Omit<Veiculo, 'id'>): Promise<Veiculo> {
+  const validatedData = VeiculoCreateSchema.parse(data);
+  return await prisma.veiculo.create({
+    data: validatedData,
+  });
+}
+
+/**
+ * Atualiza um veículo existente pelo número da placa.
+ * @param placa Número da placa do veículo a ser atualizado.
+ * @param updateData Dados atualizados do veículo.
+ * @returns Promise<Veiculo | null> Veículo atualizado ou null se não encontrado.
+ */
+export async function updateVeiculo(placa: string, updateData: Partial<Veiculo>): Promise<Veiculo | null> {
   const parsedPlaca = VeiculoPlacaSchema.parse(placa);
-
-  const updateData: any = {};
-  if (marca) updateData.marca = marca;
-  if (modelo) updateData.modelo = modelo;
-  if (ano) updateData.ano = ano;
-  if (cor) updateData.cor = cor;
-  if (motorista_CPF) updateData.motorista_CPF = motorista_CPF;
-
-  VeiculoUpdateSchema.parse({ placa: parsedPlaca, ...updateData });
 
   try {
     const veiculo = await prisma.veiculo.update({
@@ -72,17 +78,15 @@ export async function updateVeiculo(placa: string, marca?: string, modelo?: stri
   }
 }
 
-// Função para deletar um veículo
-export async function deleteVeiculo(placa: string) {
+/**
+ * Deleta um veículo pelo número da placa.
+ * @param placa Número da placa do veículo a ser deletado.
+ */
+export async function deleteVeiculo(placa: string): Promise<void> {
   const parsedPlaca = VeiculoPlacaSchema.parse(placa);
-
-  try {
-    await prisma.veiculo.delete({
-      where: {
-        placa: parsedPlaca,
-      },
-    });
-  } catch (error) {
-    throw new createHttpError.BadRequest('Erro ao deletar o veículo');
-  }
+  await prisma.veiculo.delete({
+    where: {
+      placa: parsedPlaca,
+    },
+  });
 }
