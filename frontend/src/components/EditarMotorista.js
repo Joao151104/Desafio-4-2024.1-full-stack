@@ -86,12 +86,7 @@ function EditarMotorista() {
         if (response.ok) {
           const data = await response.json();
           // Atualiza o estado do motorista com os dados obtidos
-          setMotorista({
-            nome: data.nome,
-            cpf: data.cpf,
-            categoria: data.categoria,
-            vencimento: data.vencimento,
-          });
+          setMotorista(data);
         } else {
           console.error('Erro ao buscar proprietário:', response.statusText);
         }
@@ -130,6 +125,11 @@ function EditarMotorista() {
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setMotorista({ ...motorista, [name]: value });
+  };
+
   return (
     <FormWrapper>
       <Header>
@@ -143,7 +143,7 @@ function EditarMotorista() {
             type="text"
             name="nome"
             value={motorista.nome}
-            onChange={(e) => setMotorista({ ...motorista, nome: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -153,9 +153,8 @@ function EditarMotorista() {
             type="text"
             name="cpf"
             value={motorista.cpf}
-            onChange={(e) => setMotorista({ ...motorista, cpf: e.target.value })}
+            onChange={handleChange}
             required
-            disabled // CPF não deve ser editável
           />
         </Label>
         <Label>
@@ -164,7 +163,7 @@ function EditarMotorista() {
             type="text"
             name="categoria"
             value={motorista.categoria}
-            onChange={(e) => setMotorista({ ...motorista, categoria: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -174,7 +173,7 @@ function EditarMotorista() {
             type="date"
             name="vencimento"
             value={motorista.vencimento}
-            onChange={(e) => setMotorista({ ...motorista, vencimento: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>

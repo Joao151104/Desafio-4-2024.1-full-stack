@@ -9,7 +9,7 @@ import {
   deletarProprietario,
 } from '../business/proprietario.business';
 import createHttpError from 'http-errors';
-import { ProprietarioCreateSchema, ProprietarioUpdateSchema } from '../schemas/proprietario.schema';
+import { ProprietarioUpdateInput } from '../schemas/proprietario.schema'; // Importe os tipos corretamente
 
 const router = Router();
 
@@ -35,8 +35,6 @@ router.get('/:cpf', async (req, res) => {
   }
 });
 
-// Exemplo no código do backend
-
 router.post('/', async (req, res) => {
   const { nome, cpf, categoria, vencimento } = req.body;
 
@@ -57,19 +55,18 @@ router.post('/', async (req, res) => {
   }
 });
 
-
 router.put('/:cpf', async (req, res) => {
   const cpf = req.params.cpf;
-  const { nome, categoria, vencimento } = req.body;
+  const { nome, cpf: novoCPF, categoria, vencimento } = req.body as ProprietarioUpdateInput; // Corrija para usar ProprietarioUpdateInput
 
   try {
-    const validatedData = ProprietarioUpdateSchema.parse({
-      nome,
-      categoria,
-      vencimento,
-    });
+    // Validação dos dados recebidos
+    if (!nome || !categoria || !vencimento) {
+      throw new Error('Por favor, preencha todos os campos obrigatórios.');
+    }
 
-    const proprietario = await atualizarProprietario(cpf, { nome, categoria, vencimento });
+    // Atualizar o proprietário no banco de dados
+    const proprietario = await atualizarProprietario(cpf, { nome, cpf: novoCPF, categoria, vencimento });
 
     if (!proprietario) {
       throw new createHttpError.NotFound('Proprietário não encontrado');

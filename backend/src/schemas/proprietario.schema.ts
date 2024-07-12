@@ -11,6 +11,7 @@ export const ProprietarioCreateSchema = z.object({
 
 export const ProprietarioUpdateSchema = z.object({
   nome: z.string().min(1, "Nome é obrigatório").optional(),
+  cpf: z.string().length(11, "CPF deve ter 11 dígitos").optional(),
   categoria: z.string().min(1, "Categoria é obrigatória").optional(),
   vencimento: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de data inválido (yyyy-mm-dd)").optional(),
 });
