@@ -1,8 +1,6 @@
-// src/components/CriarMulta.js
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useProprietarios } from '../contexts/ProprietariosContext';
 
 const FormWrapper = styled.div`
   text-align: center;
@@ -55,6 +53,14 @@ const Input = styled.input`
   margin-left: 10px;
 `;
 
+const Select = styled.select`
+  padding: 10px;
+  width: 180px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-left: 10px;
+`;
+
 const SubmitButton = styled.button`
   background-color: #6c63ff;
   border: none;
@@ -70,42 +76,91 @@ const SubmitButton = styled.button`
   }
 `;
 
+const tipoInfracoes = [
+  'Velocidade acima da máxima permitida',
+  'Estacionar em local proibido',
+  'Dirigir utilizando o celular',
+  'Dirigir sob efeito de álcool',
+  'Não utilizar cinto de segurança',
+  'Avançar o sinal vermelho',
+];
+
 function CriarMulta() {
   const navigate = useNavigate();
-  const { index } = useParams();
-  const { proprietarios, addMulta } = useProprietarios();
+  const { cpf } = useParams();
+  
   const [multa, setMulta] = useState({
     valor: '',
     data: '',
     pontos: '',
     tipo: '',
-    placa: proprietarios[index].veiculos,
+    veiculoId: '',
+    infratorCPF: '', // Inicializa como vazio e será atualizado depois
   });
 
-  const handleCloseClick = () => {
-    navigate(`/multas/${index}`);
+  useEffect(() => {
+    // Supondo que o CPF do infrator está armazenado no localStorage com a chave 'cpf'
+    const cpfInfrator = localStorage.getItem('cpf');
+    if (cpfInfrator) {
+      setMulta((prevState) => ({
+        ...prevState,
+        infratorCPF: cpfInfrator,
+      }));
+    }
+  }, []);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const multaPost = {
+      valor: parseFloat(multa.valor),
+      data: multa.data,
+      pontos: parseInt(multa.pontos),
+      tipo: multa.tipo,
+      veiculoId: multa.veiculoId,
+      infratorCPF: multa.infratorCPF,
+    };
+
+    try {
+      const response = await fetch('http://localhost:8000/multa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(multaPost),
+      });
+
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        throw new Error(`Erro ${response.status}: ${errorResponse.message}`);
+      }
+
+      const data = await response.json();
+      navigate(`/multas/${cpf}`);
+    } catch (error) {
+      console.error('Erro ao criar a multa:', error.message);
+    }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    addMulta(index, multa);
-    navigate(`/multas/${index}`);
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setMulta({ ...multa, [name]: value });
   };
 
   return (
     <FormWrapper>
       <Header>
         <Title>Criar Multa</Title>
-        <CloseButton onClick={handleCloseClick}>✖</CloseButton>
+        <CloseButton>X</CloseButton>
       </Header>
       <Form onSubmit={handleSubmit}>
         <Label>
           Valor:
           <Input
-            type="text"
+            type="number"
             name="valor"
             value={multa.valor}
-            onChange={(e) => setMulta({ ...multa, valor: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -115,7 +170,7 @@ function CriarMulta() {
             type="date"
             name="data"
             value={multa.data}
-            onChange={(e) => setMulta({ ...multa, data: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>
@@ -125,23 +180,35 @@ function CriarMulta() {
             type="number"
             name="pontos"
             value={multa.pontos}
-            onChange={(e) => setMulta({ ...multa, pontos: e.target.value })}
+            onChange={handleChange}
             required
           />
         </Label>
         <Label>
           Tipo:
-          <Input
-            type="text"
+          <Select
             name="tipo"
             value={multa.tipo}
-            onChange={(e) => setMulta({ ...multa, tipo: e.target.value })}
+            onChange={handleChange}
             required
-          />
+          >
+            <option value="">Selecione o tipo</option>
+            {tipoInfracoes.map((tipo, index) => (
+              <option key={index} value={tipo}>
+                {tipo}
+              </option>
+            ))}
+          </Select>
         </Label>
         <Label>
-          Placa:
-          <Input type="text" name="placa" value={multa.placa} readOnly />
+          Veículo ID:
+          <Input
+            type="text"
+            name="veiculoId"
+            value={multa.veiculoId}
+            onChange={handleChange}
+            required
+          />
         </Label>
         <SubmitButton type="submit">Criar</SubmitButton>
       </Form>

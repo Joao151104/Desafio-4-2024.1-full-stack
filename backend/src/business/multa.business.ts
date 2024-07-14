@@ -1,5 +1,3 @@
-// src/business/multa.business.ts
-
 import { PrismaClient } from '@prisma/client';
 import createHttpError from 'http-errors';
 import { MultaCreateDTO, MultaUpdateDTO } from '../schemas/multa.schema';
@@ -24,24 +22,47 @@ export async function encontrarMultaPorID(multaID: number) {
 
 // Função para criar uma nova multa
 export async function criarMulta(data: MultaCreateDTO) {
-  const multaUncheckedInput = {
-    valor: Number(data.valor), // Converter para number
-    data: data.data,
-    pontos_penalidade: data.pontos,
-    tipo_infracao: data.tipo,
-    veiculo_placa: data.veiculoId // Se `veiculoId` for `veiculo_placa` no Prisma
-  };
-
   try {
+    if (!isValidCPF(data.infratorCPF)) {
+      throw new createHttpError.BadRequest('CPF do infrator inválido');
+    }
+
     const multa = await prisma.multa.create({
-      data: multaUncheckedInput,
+      data: {
+        valor: data.valor,
+        data: data.data,
+        pontos_penalidade: data.pontos,
+        tipo_infracao: data.tipo,
+        veiculo_placa: data.veiculoId,
+        infrator_CPF: data.infratorCPF,
+      },
     });
+
     return multa;
   } catch (error) {
+    console.error('Erro ao criar a multa:', error);
+    if (error instanceof Error && error.message.includes('PrismaClientKnownRequestError')) {
+      throw new createHttpError.BadRequest('Erro ao processar a requisição');
+    }
     throw new createHttpError.BadRequest('Erro ao criar a multa');
   }
 }
 
+function isValidCPF(cpf: string): boolean {
+  let sum = 0;
+  let remainder;
+  if (cpf.length !== 11 || /^[0-9]+$/.test(cpf) === false) return false;
+  for (let i = 1; i <= 9; i++) sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+  remainder = (sum * 10) % 11;
+  if ((remainder === 10) || (remainder === 11)) remainder = 0;
+  if (remainder !== parseInt(cpf.substring(9, 10))) return false;
+  sum = 0;
+  for (let i = 1; i <= 10; i++) sum = sum + parseInt(cpf.substring(i - 1, i)) * (12 - i);
+  remainder = (sum * 10) % 11;
+  if ((remainder === 10) || (remainder === 11)) remainder = 0;
+  if (remainder !== parseInt(cpf.substring(10, 11))) return false;
+  return true;
+}
 // Função para atualizar uma multa
 export async function atualizarMulta(multaID: number, data: MultaUpdateDTO) {
   // Extrair apenas os campos definidos para atualização
@@ -86,4 +107,14 @@ export async function deletarMulta(multaID: number) {
       multaID,
     },
   });
+}
+
+// Função para listar multas por CPF do infrator
+export async function listarMultasPorCPF(cpf: string) {
+  const multas = await prisma.multa.findMany({
+    where: {
+      infrator_CPF: cpf, // Use o campo correto aqui
+    },
+  });
+  return multas;
 }

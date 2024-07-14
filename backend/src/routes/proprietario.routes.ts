@@ -9,7 +9,7 @@ import {
   deletarProprietario,
 } from '../business/proprietario.business';
 import createHttpError from 'http-errors';
-import { ProprietarioCreateSchema } from '../schemas/proprietario.schema';
+import { ProprietarioCreateSchema, ProprietarioUpdateSchema } from '../schemas/proprietario.schema';
 
 const router = Router();
 
@@ -28,22 +28,17 @@ router.get('/:cpf', async (req, res) => {
 });
 
 router.post('/', async (req, res) => {
-  const { nome, cpf, categoria, vencimento } = ProprietarioCreateSchema.parse(req.body);
-  const proprietario = await criarProprietario({ nome, cpf, categoria, vencimento });
-  return res.status(201).json(proprietario);
-});
-
-router.put('/:cpf', async (req, res) => {
-  const cpf = req.params.cpf;
-  const { nome, categoria, vencimento } = req.body;
-
-  const proprietario = await atualizarProprietario(cpf, { nome, categoria, vencimento });
-
-  if (!proprietario) {
-    throw new createHttpError.NotFound('Proprietário não encontrado');
+  try {
+    const { nome, cpf, categoria, vencimento } = ProprietarioCreateSchema.parse(req.body);
+    const proprietario = await criarProprietario({ nome, cpf, categoria, vencimento });
+    return res.status(201).json(proprietario);
+  } catch (error) {
+    console.error('Erro ao criar proprietário:', error);
+    return res.status(400).json({ message: 'Erro ao criar o proprietário' });
   }
-  return res.status(200).json(proprietario);
 });
+
+
 
 router.delete('/:cpf', async (req, res) => {
   const cpf = req.params.cpf;

@@ -102,7 +102,7 @@ function CriarProprietario() {
     };
 
     try {
-      const response = await fetch('http://localhost:8000/proprietario', {
+      const response = await fetch('http://localhost:8000/proprietario/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

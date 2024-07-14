@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import styled from 'styled-components';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useMultasCPF } from '../contexts/multaCPF';
-import { format } from 'date-fns'; // Importar a função format do date-fns
+import { format } from 'date-fns';
 
 const MultasWrapper = styled.div`
   text-align: center;
@@ -10,7 +10,7 @@ const MultasWrapper = styled.div`
 `;
 
 const Header = styled.header`
-  background-color: #fff;
+  background-color: #f1f1f1;
   padding: 20px;
   border-radius: 8px;
 `;
@@ -45,24 +45,53 @@ const Td = styled.td`
   border: 1px solid #ddd;
 `;
 
-// Função para formatar a data no formato desejado
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.5em;
+`;
+
+const CreateButton = styled.button`
+  margin: 20px auto;
+  padding: 10px 20px;
+  background-color: #6c63ff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+`;
+
 const formatDate = (date) => {
   return format(new Date(date), 'dd/MM/yyyy');
 };
 
 function Multas() {
   const { cpf } = useParams();
+  const navigate = useNavigate();
   const { multas, loading, error, fetchMultasByCPF } = useMultasCPF();
 
   useEffect(() => {
     fetchMultasByCPF(cpf);
+    // Armazenar o CPF no localStorage para persistência
+    localStorage.setItem('cpf', cpf);
   }, [cpf, fetchMultasByCPF]);
+
+  const handleEditClick = (multaID) => {
+    navigate(`/editar-multa/${multaID}`);
+  };
+
+  const handleCreateClick = () => {
+    navigate(`/criar-multa/${cpf}`);
+  };
 
   return (
     <MultasWrapper>
       <Header>
         <SubTitle>Multas do Proprietário</SubTitle>
-       
+
+        <CreateButton onClick={handleCreateClick}>Criar Multa</CreateButton>
 
         <Table>
           <thead>
@@ -72,16 +101,18 @@ function Multas() {
               <Th>Pontos</Th>
               <Th>Tipo</Th>
               <Th>Placa do Veículo</Th>
+              <Th>Editar</Th>
             </tr>
           </thead>
           <tbody>
             {multas.map((multa) => (
-              <tr key={multa.id}>
+              <tr key={multa.multaID}>
                 <Td>{multa.valor}</Td>
-                <Td>{formatDate(multa.data)}</Td> {/* Utiliza a função formatDate para exibir a data formatada */}
+                <Td>{formatDate(multa.data)}</Td>
                 <Td>{multa.pontos_penalidade}</Td>
                 <Td>{multa.tipo_infracao}</Td>
                 <Td>{multa.veiculo_placa}</Td>
+                <Td><IconButton onClick={() => handleEditClick(multa.multaID)}>✏️</IconButton></Td>
               </tr>
             ))}
           </tbody>

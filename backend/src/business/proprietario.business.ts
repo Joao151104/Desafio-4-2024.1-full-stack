@@ -48,7 +48,7 @@ export async function criarProprietario(data: { nome: string; cpf: string; categ
     const proprietario = await prisma.proprietario.create({
       data: {
         CPF: cpf,
-        nome,
+        nome: nome,
         vencimento_CNH: vencimentoDate,
         categoria_CNH: categoria,
       },
@@ -91,6 +91,7 @@ export async function atualizarProprietario(cpf: string, data: { nome?: string; 
         veiculos: true,
       },
     });
+    
 
     return proprietario;
   } catch (error) {

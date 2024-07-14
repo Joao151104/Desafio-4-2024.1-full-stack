@@ -17,7 +17,7 @@ export const MultasCPFProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`http://localhost:8000/multa/cpf/${cpf}`);
+      const response = await fetch(`http://localhost:8000/multa/por-cpf/${cpf}`);
       if (!response.ok) {
         throw new Error('Erro ao buscar multas');
       }
